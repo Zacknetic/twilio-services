@@ -1,0 +1,106 @@
+{
+  "workspaceName": "zackautomated1",
+  "settings": {
+    "eventCallbackUrl": "https://your-domain.com/events",
+    "multiTaskEnabled": false,
+    "prioritizeQueueOrder": "FIFO"
+  },
+  "activities": [
+    {
+      "friendlyName": "Available",
+      "available": true
+    },
+    {
+      "friendlyName": "Unavailable",
+      "available": false
+    },
+    {
+      "friendlyName": "In-Call",
+      "available": false
+    },
+    {
+      "friendlyName": "Post-Call",
+      "available": false
+    },
+    {
+      "friendlyName": "Offline",
+      "available": false
+    }
+  ],
+  "taskQueues": [
+    {
+      "friendlyName": "ANY Language. ANY Institute. ONLY Tellers",
+      "targetWorkers": "isSupervisor == \"No\"",
+      "maxReservedWorkers": 1,
+      "taskOrder": "FIFO",
+      "assignmentActivityName": "In-Call",
+      "reservationActivityName": "In-Call"
+    },
+    {
+      "friendlyName": "ANY Language. ANY Institute. ANY Tellers OR Supervisors",
+      "targetWorkers": "1==1",
+      "maxReservedWorkers": 1,
+      "taskOrder": "FIFO",
+      "assignmentActivityName": "In-Call",
+      "reservationActivityName": "In-Call"
+    }
+  ],
+  "workflows": [
+    {
+      "friendlyName": "Support Workflow",
+      "configuration": {
+        "task_routing": {
+          "filters": [
+            {
+              "filter_friendly_name": "All Tasks",
+              "expression": "1==1",
+              "targets": [
+                {
+                  "queue": "ANY Language. ANY Institute. ONLY Tellers",
+                  "timeout": 180,
+                  "expression": "worker.languages HAS task.requestLanguage AND worker.institutes HAS task.requestInstitute"
+                },
+                {
+                  "queue": "ANY Language. ANY Institute. ONLY Tellers",
+                  "expression": "worker.languages HAS task.requestLanguage",
+                  "timeout": 60
+                },
+                {
+                  "queue": "ANY Language. ANY Institute. ANY Tellers OR Supervisors",
+                  "expression": "worker.languages HAS task.requestLanguage AND worker.institutes HAS task.requestInstitute",
+                  "timeout": 30
+                },
+                {
+                  "queue": "ANY Language. ANY Institute. ANY Tellers OR Supervisors",
+                  "expression": "worker.languages HAS task.requestLanguage",
+                  "timeout": 30
+                },
+                {
+                  "queue": "ANY Language. ANY Institute. ANY Tellers OR Supervisors"
+                }
+              ]
+            }
+          ],
+          "default_filter": {
+            "queue": "ANY Language. ANY Institute. ONLY Tellers"
+          }
+        }
+      },
+      "taskReservationTimeout": 300
+    }
+  ],
+  "workers": [
+    {
+      "friendlyName": "teller_en_in1@fi.com",
+      "attributes": "{\"languages\":[\"en-US\"],\"institutes\":[\"IN1\"],\"fullName\":\"William Riker\",\"isSupervisor\":\"No\"}"
+    },
+    {
+      "friendlyName": "teller_es_in1@fi.com",
+      "attributes": "{\"languages\":[\"es-ES\"],\"institutes\":[\"IN1\"],\"fullName\":\"Geordi LaForge\",\"isSupervisor\":\"No\"}"
+    },
+    {
+      "friendlyName": "supervisor_en_in1@fi.com",
+      "attributes": "{\"languages\":[\"en-US\"],\"institutes\":[\"IN1\"],\"fullName\":\"Jean-Luc Picard\",\"isSupervisor\":\"Yes\"}"
+    }
+  ]
+}
